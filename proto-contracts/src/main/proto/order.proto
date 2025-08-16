@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "kz.musin.proto.order";
+option java_multiple_files = true;
+
+service OrderService {
+  rpc CreateOrder (OrderRequest) returns (OrderResponse);
+}
+
+message OrderRequest {
+  string userId = 1;
+  string productId = 2;
+}
+
+message OrderResponse {
+  string orderId = 1;
+  string status = 2;
+}

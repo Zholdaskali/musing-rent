@@ -1,0 +1,47 @@
+server:
+  port: 8081
+
+grpc:
+  server:
+    port: 9091
+
+spring:
+  application:
+    name: AUTH-SERVICE
+  security:
+    user:
+      name: user
+      password: pass
+  datasource:
+    url: jdbc:postgresql://localhost:5432/microservice_auth
+    username: postgres
+    password: erke
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+    metadata-map:
+      gRPC_port: ${grpc.server.port}
+
+# Конфигурация Flyway
+flyway:
+  enabled: false
+  locations: classpath:db/migration
+  schemas: public
