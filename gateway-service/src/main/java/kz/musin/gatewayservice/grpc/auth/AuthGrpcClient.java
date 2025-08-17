@@ -1,5 +1,6 @@
 package kz.musin.gatewayservice.grpc.auth;
 
+import kz.musin.gatewayservice.dto.auth.request.LoginRequestDto;
 import kz.musin.gatewayservice.dto.auth.request.RegisterRequestDto;
 import kz.musin.proto.auth.*;
 import net.devh.boot.grpc.client.inject.GrpcClient;
@@ -39,13 +40,11 @@ public class AuthGrpcClient {
     }
 
     /**
-     * Проверяет валидность JWT токена через Auth-микросервис.
+     * <p>Метод формирует protoRequest и отправляет его на Auth-сервис.
+     * Возвращает RegisterResponse с информацией о регистрацией.</p>
      *
-     * <p>Метод формирует TokenRequest и отправляет его на Auth-сервис.
-     * Возвращает TokenResponse с информацией о токене.</p>
-     *
-     * @param request JWT токен пользователя
-     * @return RegisterResponseDto с результатом проверки токена
+     * @param request регистрационные данные пользователя
+     * @return RegisterResponse с результатом проверки токена
      * @throws io.grpc.StatusRuntimeException если Auth-сервис недоступен или произошла ошибка
      */
     public RegisterResponse register(RegisterRequestDto request) {
@@ -58,5 +57,23 @@ public class AuthGrpcClient {
                 .build();
 
         return authStub.register(protoRequest);
+    }
+
+    /**
+     * <p>Метод формирует LoginRequest и отправляет его на Auth-сервис.
+     * Возвращает LoginResponse с информацией о токене.</p>
+     *
+     * @param request Данные пользователя для входа
+     * @return LoginResponse с результатом проверки токена
+     * @throws io.grpc.StatusRuntimeException если Auth-сервис недоступен или произошла ошибка
+     */
+    public LoginResponse login(LoginRequestDto request) {
+        log.info("Начало регистрации RegisterRequestDto:{}", request);
+
+        LoginRequest loginRequest = LoginRequest.newBuilder()
+                .setEmail(request.getEmail())
+                .setPassword(request.getPassword())
+                .build();
+        return authStub.login(loginRequest);
     }
 }

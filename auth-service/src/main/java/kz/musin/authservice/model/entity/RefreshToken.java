@@ -1,4 +1,4 @@
-package kz.musin.authservice.entity;
+package kz.musin.authservice.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;

@@ -1,6 +1,6 @@
 package kz.musin.authservice.repository;
 
-import kz.musin.authservice.entity.RefreshToken;
+import kz.musin.authservice.model.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

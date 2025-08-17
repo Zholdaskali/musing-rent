@@ -1,9 +1,11 @@
 package kz.musin.gatewayservice.controller.auth;
 
 import jakarta.validation.Valid;
+import kz.musin.gatewayservice.dto.auth.request.LoginRequestDto;
 import kz.musin.gatewayservice.dto.auth.request.RegisterRequestDto;
 import kz.musin.gatewayservice.dto.auth.request.TokenRequestDto;
 import kz.musin.gatewayservice.dto.ApiResponse;
+import kz.musin.gatewayservice.dto.auth.response.LoginResponseDto;
 import kz.musin.gatewayservice.dto.auth.response.RegisterResponseDto;
 import kz.musin.gatewayservice.dto.auth.response.TokenResponseDto;
 import kz.musin.gatewayservice.grpc.auth.AuthGrpcClient;
@@ -28,6 +30,7 @@ public class AuthGatewayController {
     private static final Logger log = LoggerFactory.getLogger(AuthGatewayController.class);
 
     /**
+     * Тестовый метод
      * Валидирует JWT токен пользователя.
      *
      * <p>Метод принимает токен от клиента, передает его Auth-сервису через gRPC.
@@ -54,13 +57,28 @@ public class AuthGatewayController {
      * Если регистрация успешна, возвращает uuid id user.
      * Если токен невалидный или gRPC сервис недоступен — возвращает ошибку 401 Unauthorized.</p>
      *
-     * @param jsonRequest DTO с токеном пользователя
+     * @param request DTO с токеном пользователя
      * @return ApiResponse с данными токена или ошибкой
      */
     @PostMapping("/register")
     public ApiResponse<?> register(@Valid @RequestBody RegisterRequestDto request) {
         log.info("RestController контроллер GateWay -> RegisterRequestDto:{}", request);
         return ResponseBuilder.success(RegisterResponseDto.fromProto(authGrpcClient.register(request)));
+    }
+
+    /**
+     * Логинизация пользователя.
+     *
+     * <p>Метод принимает данные для входа от клиента, передает его Auth-сервису через gRPC.
+     * Если вход успешна, возвращает данные user и 2 вида токена.</p>
+     *
+     * @param request DTO с токеном пользователя
+     * @return ApiResponse с данными токена или ошибкой
+     */
+    @PostMapping("/login")
+    public ApiResponse<?> login(@Valid @RequestBody LoginRequestDto request) {
+        log.info("RestController контроллер GateWay -> RegisterRequestDto:{}", request);
+        return ResponseBuilder.success(LoginResponseDto.fromProto(authGrpcClient.login(request)));
     }
 
 }
