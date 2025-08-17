@@ -1,7 +1,6 @@
 package kz.musin.gatewayservice.grpc.auth;
 
 import kz.musin.gatewayservice.dto.auth.request.RegisterRequestDto;
-import kz.musin.gatewayservice.dto.auth.response.RegisterResponseDto;
 import kz.musin.proto.auth.*;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.slf4j.Logger;
@@ -52,7 +51,7 @@ public class AuthGrpcClient {
     public RegisterResponse register(RegisterRequestDto request) {
         log.info("Начало регистрации RegisterRequestDto:{}", request);
 
-        RegisterRequest protoRequest= RegisterRequest.newBuilder()
+        RegisterRequest protoRequest = RegisterRequest.newBuilder()
                 .setUserName(request.getUsername())
                 .setEmail(request.getEmail())
                 .setPassword(request.getPassword())

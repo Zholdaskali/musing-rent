@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  * Обрабатывает запросы клиентов и делегирует проверку токена Auth-сервису через gRPC.
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthGatewayController {
 
