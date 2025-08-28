@@ -48,19 +48,4 @@ message LoginRequest {
 message LoginResponse {
   string accessToken = 1;
   string refreshToken = 2;
-  UserData data = 3;
-}
-
-// возвращаемые данные после логина
-message UserData {
-  string userName = 1;
-  string email = 2;
-  google.protobuf.Timestamp create_at = 3;
-  google.protobuf.Timestamp update_at = 4;
-  UserRoles roles = 5; // роли ->
-}
-
-// -> роли списком могут быть комбинированные то есть покупатель и продавец
-message UserRoles {
-  repeated string name = 1;
 }

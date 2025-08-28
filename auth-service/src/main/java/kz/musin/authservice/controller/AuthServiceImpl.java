@@ -9,6 +9,7 @@ import kz.musin.authservice.exception.UserNotFoundException;
 import kz.musin.authservice.model.entity.User;
 import kz.musin.authservice.repository.UserRepository;
 import kz.musin.authservice.util.encoder.PasswordEncoder;
+import kz.musin.authservice.util.jwt.JwtGenerate;
 import kz.musin.proto.auth.*;
 import kz.musin.proto.auth.AuthServiceGrpc;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,6 @@ import net.devh.boot.grpc.server.service.GrpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.Instant;
-import java.util.UUID;
 
 @GrpcService
 @RequiredArgsConstructor
@@ -24,8 +24,8 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final JwtGenerate jwtGenerate;
     private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
-
 
     /**
      * Тестирование grpc подключения
@@ -73,8 +73,7 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase {
 
             // 4. Генерация токенов
             // TokenPair tokenPair = tokenService.generateTokenPair(user);
-            String token = UUID.randomUUID().toString();
-
+            String token = jwtGenerate.generateToken(user, "ADMIN");
 
             // 5. Построение ответа
             LoginResponse response = buildLoginResponse(user, token);
@@ -106,36 +105,11 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase {
     }
 
     private LoginResponse buildLoginResponse(User user, String token) {
-        UserRoles roles = UserRoles.newBuilder()
-                .addName("ADMIN")  // Используем addName() вместо setName()
-                .build();
-
-        UserData userData = UserData.newBuilder()
-                .setUserName(user.getUserName())
-                .setEmail(user.getEmail())
-                .setCreateAt(convertToProtoTimestamp(user.getCreatedAt()))
-                .setUpdateAt(convertToProtoTimestamp(user.getUpdatedAt()))
-                .setRoles(roles)
-                .build();
-
         return LoginResponse.newBuilder()
                 .setAccessToken(token)
                 .setRefreshToken(token)
-                .setData(userData)
                 .build();
     }
-
-    private Timestamp convertToProtoTimestamp(Instant instant) {
-        if (instant == null) {
-            return null;
-        }
-
-        return Timestamp.newBuilder()
-                .setSeconds(instant.getEpochSecond())
-                .setNanos(instant.getNano()).build();
-    }
-
-
 
     /**
      * Регистрация пользователя в систему

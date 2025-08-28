@@ -11,13 +11,11 @@ public class LoginResponseDto {
 
     private final String accessToken;
     private final String refreshToken;
-    private final UserDataDto data;
 
     public static LoginResponseDto fromProto(LoginResponse proto) {
         return LoginResponseDto.builder()
                 .accessToken(proto.getAccessToken())
                 .refreshToken(proto.getRefreshToken())
-                .data(UserDataDto.fromProto(proto.getData()))
                 .build();
     }
 }

@@ -50,6 +50,17 @@ public class AuthGatewayController {
         }
     }
 
+    @PostMapping("/validate-token2")
+    public ApiResponse<?> validateToken2(@Valid @RequestBody TokenRequestDto request) {
+        TokenResponse response = authGrpcClient.validateToken(request.getToken());
+        if (response.getValid()) {
+            return ResponseBuilder.success(TokenResponseDto.fromProto(response));
+        } else {
+            return ResponseBuilder.unauthorized("Invalid Token");
+        }
+    }
+
+
     /**
      * Регистрация пользователя.
      *
