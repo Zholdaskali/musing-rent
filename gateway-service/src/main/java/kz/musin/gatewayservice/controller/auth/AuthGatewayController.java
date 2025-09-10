@@ -2,6 +2,7 @@ package kz.musin.gatewayservice.controller.auth;
 
 import jakarta.validation.Valid;
 import kz.musin.gatewayservice.dto.auth.request.LoginRequestDto;
+import kz.musin.gatewayservice.dto.auth.request.RefreshTokenRequestDto;
 import kz.musin.gatewayservice.dto.auth.request.RegisterRequestDto;
 import kz.musin.gatewayservice.dto.auth.request.TokenRequestDto;
 import kz.musin.gatewayservice.dto.ApiResponse;
@@ -88,8 +89,21 @@ public class AuthGatewayController {
      */
     @PostMapping("/login")
     public ApiResponse<?> login(@Valid @RequestBody LoginRequestDto request) {
-        log.info("RestController контроллер GateWay -> RegisterRequestDto:{}", request);
+        log.info("RestController контроллер GateWay -> LoginRequestDto:{}", request);
         return ResponseBuilder.success(LoginResponseDto.fromProto(authGrpcClient.login(request)));
+    }
+
+
+    /**
+     * Обновление токена возвращает новый подписанный jwt и refresh token
+     *
+     * @param request
+     * @return ApiResponse с данными
+     */
+    @PostMapping("/refresh-token")
+    public ApiResponse<?> refreshToken(@Valid @RequestBody RefreshTokenRequestDto request) {
+        log.info("RestController контроллер GateWay -> RefreshTokenRequestDto");
+        return ResponseBuilder.success(LoginResponseDto.fromProto(authGrpcClient.refreshToken(request)));
     }
 
 }

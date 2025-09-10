@@ -16,7 +16,7 @@ public class RefreshToken {
     private UUID id;
 
     @Column(name = "auth_id")
-    private String authId;
+    private UUID authId;
 
     @Column(name = "token")
     private String token;
@@ -27,4 +27,15 @@ public class RefreshToken {
     @Column(name = "create_at")
     private LocalDateTime createAt;
 
+
+    public RefreshToken(UUID authId, String token) {
+        this.authId = authId;
+        this.token = token;
+        this.createAt = LocalDateTime.now();
+        this.expiresAt = createAt.plusDays(7); // срок действия 7 дней
+    }
+
+    public RefreshToken() {
+
+    }
 }

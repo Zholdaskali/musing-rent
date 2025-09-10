@@ -10,6 +10,7 @@ service AuthService {
   rpc ValidateToken (TokenRequest) returns (TokenResponse);
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
+  rpc RefreshToken (RefreshTokenRequest) returns (LoginResponse);
 }
 
 
@@ -48,4 +49,9 @@ message LoginRequest {
 message LoginResponse {
   string accessToken = 1;
   string refreshToken = 2;
+}
+
+// 5 - grpc dto Refresh-token
+message RefreshTokenRequest {
+  string refreshToken = 1;
 }

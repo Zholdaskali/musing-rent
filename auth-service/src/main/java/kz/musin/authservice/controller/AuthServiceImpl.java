@@ -6,7 +6,9 @@ import io.grpc.stub.StreamObserver;
 import io.micrometer.common.util.StringUtils;
 import kz.musin.authservice.exception.AuthenticationException;
 import kz.musin.authservice.exception.UserNotFoundException;
+import kz.musin.authservice.model.entity.RefreshToken;
 import kz.musin.authservice.model.entity.User;
+import kz.musin.authservice.repository.RefreshTokenRepository;
 import kz.musin.authservice.repository.UserRepository;
 import kz.musin.authservice.util.encoder.PasswordEncoder;
 import kz.musin.authservice.util.jwt.JwtGenerate;
@@ -17,6 +19,7 @@ import net.devh.boot.grpc.server.service.GrpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.Instant;
+import java.util.UUID;
 
 @GrpcService
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase {
     private final UserRepository userRepository;
     private final JwtGenerate jwtGenerate;
     private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
+    private final RefreshTokenRepository refreshTokenRepository;
 
     /**
      * Тестирование grpc подключения
@@ -73,6 +77,7 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase {
 
             // 4. Генерация токенов
             // TokenPair tokenPair = tokenService.generateTokenPair(user);
+
             String token = jwtGenerate.generateToken(user, "ADMIN");
 
             // 5. Построение ответа
@@ -105,11 +110,27 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase {
     }
 
     private LoginResponse buildLoginResponse(User user, String token) {
+
+        String refreshToken = createRefreshToken(user);
+
         return LoginResponse.newBuilder()
                 .setAccessToken(token)
-                .setRefreshToken(token)
+                .setRefreshToken(refreshToken)
                 .build();
     }
+
+    private String createRefreshToken(User user) {
+        try {
+            String refreshToken = UUID.randomUUID().toString();
+            UUID userId = user.getId();
+            RefreshToken refreshTokenEntity = new RefreshToken(userId, refreshToken);
+            refreshTokenRepository.save(refreshTokenEntity);
+            return refreshToken;
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e + " Ошибка при создании токена обновления");
+        }
+    }
+
 
     /**
      * Регистрация пользователя в систему
@@ -121,8 +142,6 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase {
     public void register(RegisterRequest request, StreamObserver<RegisterResponse> responseObserver) {
         log.info("Микросервис Auth-service Начало регистрации");
         try {
-
-
 
             User user = new User(
                     request.getUserName(),
@@ -151,5 +170,46 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase {
 
             log.error(e.getMessage());
         }
+    }
+
+
+    /**
+     *  Обновление токена
+     *
+     * @param request
+     * @param responseObserver
+     */
+    @Override
+    public void refreshToken(RefreshTokenRequest request, StreamObserver<LoginResponse> responseObserver) {
+        log.info("Микросервис Auth-service Начало обновления токена");
+
+        try {
+            String refreshToken = request.getRefreshToken();
+
+            RefreshToken refreshToken1 = refreshTokenRepository.findRefreshTokenByToken(refreshToken).orElseThrow(() -> new RuntimeException("RefreshToken not found"));
+
+            refreshTokenRepository.delete(refreshToken1);
+
+            User user = userRepository.findById(refreshToken1.getAuthId()).orElseThrow(() -> new RuntimeException("User not found"));
+
+            String token = jwtGenerate.generateToken(user, "ADMIN");
+
+            // 5. Построение ответа
+            LoginResponse response = buildLoginResponse(user, token);
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+
+        } catch (RuntimeException e) {
+            responseObserver.onError(
+                    io.grpc.Status.INTERNAL
+                            .withDescription("Ошибка при обновлении токена: " + e.getMessage())
+                            .withCause(e)
+                            .asRuntimeException()
+            );
+
+            log.error(e.getMessage());
+        }
+
     }
 }

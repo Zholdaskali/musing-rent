@@ -1,7 +1,9 @@
 package kz.musin.gatewayservice.grpc.auth;
 
 import kz.musin.gatewayservice.dto.auth.request.LoginRequestDto;
+import kz.musin.gatewayservice.dto.auth.request.RefreshTokenRequestDto;
 import kz.musin.gatewayservice.dto.auth.request.RegisterRequestDto;
+import kz.musin.gatewayservice.util.ValidationUtils;
 import kz.musin.proto.auth.*;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.slf4j.Logger;
@@ -50,6 +52,8 @@ public class AuthGrpcClient {
     public RegisterResponse register(RegisterRequestDto request) {
         log.info("Начало регистрации RegisterRequestDto:{}", request);
 
+        ValidationUtils.validate(request);
+
         RegisterRequest protoRequest = RegisterRequest.newBuilder()
                 .setUserName(request.getUsername())
                 .setEmail(request.getEmail())
@@ -75,5 +79,14 @@ public class AuthGrpcClient {
                 .setPassword(request.getPassword())
                 .build();
         return authStub.login(loginRequest);
+    }
+
+    public LoginResponse refreshToken(RefreshTokenRequestDto request) {
+        log.info("Начало обновление токена");
+
+        RefreshTokenRequest refreshTokenRequest = RefreshTokenRequest.newBuilder()
+                .setRefreshToken(request.getRefreshToken())
+                .build();
+        return authStub.refreshToken(refreshTokenRequest);
     }
 }

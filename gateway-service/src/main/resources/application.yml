@@ -1,9 +1,14 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: GATEWAY-SERVICE
-
-server:
-  port: 8080
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://auth-service:8080/.well-known/jwks.json
 
 eureka:
   client:
@@ -30,3 +35,10 @@ grpc:
       address: discovery:///order-service
       negotiationType: PLAINTEXT
       defaultLoadBalancingPolicy: round_robin
+
+auth-service:
+  jwks-uri: http://localhost:8081/.well-known/jwks.json
+
+logging:
+  level:
+    org.springframework.security: DEBUG
