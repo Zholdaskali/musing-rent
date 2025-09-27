@@ -7,11 +7,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class AuthGatewayControllerDiffblueTest {
+class AuthControllerDiffblueTest {
     /**
-     * Test {@link AuthGatewayController#register(RegisterRequestDto)}.
+     * Test {@link AuthController#register(RegisterRequestDto)}.
      *
-     * <p>Method under test: {@link AuthGatewayController#register(RegisterRequestDto)}
+     * <p>Method under test: {@link AuthController#register(RegisterRequestDto)}
      */
     @Test
     @DisplayName("Test register(RegisterRequestDto)")
@@ -23,11 +23,11 @@ class AuthGatewayControllerDiffblueTest {
 
         // Arrange
         // TODO: Populate arranged inputs
-        AuthGatewayController authGatewayController = null;
+        AuthController authController = null;
         RegisterRequestDto request = null;
 
         // Act
-        ApiResponse<?> actualRegisterResult = authGatewayController.register(request);
+        ApiResponse<?> actualRegisterResult = authController.register(request);
 
         // Assert
         // TODO: Add assertions on result

@@ -27,16 +27,28 @@ public class SecurityConfig {
     // -------------------------
     // Public endpoints
     // -------------------------
+
+    /**
+     * Публичные API
+     * @param http
+     * @return
+     */
     @Bean
     @Order(1)
     public SecurityWebFilterChain publicEndpoints(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .securityMatcher(ServerWebExchangeMatchers.pathMatchers(
+                        "/webjars/swagger-ui/index.html#/",
+                        "/api-docs/**",
+                        "/v3/api-docs/**",
+                        "/webjars/swagger-ui/**",
+                        "/swagger-ui/**",
+                        "/swagger-resources/**", // И ЭТУ!
                         "/api/v1/auth/**",
                         "/public/**",
                         "/.well-known/jwks.json",
-                        "/actuator/**" // health-check
+                        "/actuator/**"
                 ))
                 .authorizeExchange(ex -> ex.anyExchange().permitAll())
                 .build();
@@ -45,6 +57,12 @@ public class SecurityConfig {
     // -------------------------
     // Secured endpoints
     // -------------------------
+
+    /**
+     * Приватные API проверка jwt токена
+     * @param http
+     * @return
+     */
     @Bean
     @Order(2)
     public SecurityWebFilterChain securedEndpoints(ServerHttpSecurity http) {
@@ -81,14 +99,11 @@ public class SecurityConfig {
     @Bean
     public Converter<Jwt, Mono<AbstractAuthenticationToken>> jwtAuthConverter() {
         return jwt -> {
-            // Тянем роль из claim "role", который кладёт Auth-service
             String role = jwt.getClaimAsString("role");
-
             Collection<GrantedAuthority> authorities = Collections.emptyList();
             if (role != null && !role.isBlank()) {
                 authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()));
             }
-
             return Mono.just(new JwtAuthenticationToken(jwt, authorities));
         };
     }

@@ -24,11 +24,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthGatewayController {
+public class AuthController {
 
     /** gRPC клиент для взаимодействия с Auth-сервисом */
     private final AuthGrpcClient authGrpcClient;
-    private static final Logger log = LoggerFactory.getLogger(AuthGatewayController.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     /**
      * Тестовый метод

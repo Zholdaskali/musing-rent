@@ -1,19 +1,19 @@
 server:
-  port: 8083
+  port: 8084
 
 grpc:
   server:
-    port: 9093
+    port: 9094
 
 spring:
   application:
-    name: USER-SERVICE
+    name: DOCUMENT-SERVICE
   security:
     user:
       name: user
       password: pass
   datasource:
-    url: jdbc:postgresql://localhost:5432/microservice_user
+    url: jdbc:postgresql://localhost:5432/microservice_document
     username: postgres
     password: erke
     driver-class-name: org.postgresql.Driver
@@ -40,7 +40,7 @@ eureka:
     metadata-map:
       gRPC_port: ${grpc.server.port}
 
-# Конфигурация Flyway
+# ???????????? Flyway
 flyway:
   enabled: false
   locations: classpath:db/migration

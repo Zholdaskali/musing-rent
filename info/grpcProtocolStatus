@@ -1,0 +1,9 @@
+Ситуация	        gRPC Status	                HTTP Аналог
+
+Успех	            Status.OK	                200 OK
+Не найдено	        Status.NOT_FOUND	        404 Not Found
+Невалидные данные	Status.INVALID_ARGUMENT	    400 Bad Request
+Уже существует	    Status.ALREADY_EXISTS	    409 Conflict
+Нет прав	        Status.PERMISSION_DENIED	403 Forbidden
+БД недоступна	    Status.UNAVAILABLE	        503 Service Unavailable
+Общая ошибка	    Status.INTERNAL	            500 Internal Server Error

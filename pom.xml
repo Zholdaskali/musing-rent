@@ -25,6 +25,7 @@
         <module>user-service</module>
         <module>order-service</module>
         <module>gateway-service</module>
+        <module>document-service</module>
     </modules>
 
     <properties>

@@ -1,0 +1,290 @@
+syntax = "proto3";
+
+package document.service.v1;
+
+option java_multiple_files = true;
+option java_package = "kz.musin.document.service.grpc";
+option java_outer_classname = "DocumentServiceProto";
+
+import "google/protobuf/timestamp.proto";
+
+// Основной сервис для верификации документов
+service DocumentService {
+  // Регистрация нового документа пользователя
+  rpc RegisterDocument(RegisterDocumentRequest) returns (RegisterDocumentResponse);
+
+  // Проверка статуса верификации документа
+  rpc GetVerificationStatus(GetVerificationStatusRequest) returns (GetVerificationStatusResponse);
+
+  // Получение информации о документе пользователя
+  rpc GetUserDocument(GetUserDocumentRequest) returns (GetUserDocumentResponse);
+
+  // Верификация лица с документом (для входа на мероприятие)
+  rpc VerifyFaceMatch(VerifyFaceMatchRequest) returns (VerifyFaceMatchResponse);
+
+  // Проверка валидности документа (для других сервисов)
+  rpc ValidateDocument(ValidateDocumentRequest) returns (ValidateDocumentResponse);
+
+  // Получение списка заблокированных документов (для админки)
+  rpc GetSuspiciousDocuments(GetSuspiciousDocumentsRequest) returns (GetSuspiciousDocumentsResponse);
+
+  // Добавление документа в блэклист
+  rpc BlockDocument(BlockDocumentRequest) returns (BlockDocumentResponse);
+}
+
+// ============== REQUEST/RESPONSE MESSAGES ==============
+
+// Регистрация документа
+message RegisterDocumentRequest {
+  string auth_id = 1;              // ID пользователя из auth-service
+  bytes document_image = 2;        // Изображение документа (base64 или binary)
+  bytes selfie_image = 3;          // Селфи пользователя
+  DocumentType document_type = 4;   // Тип документа
+}
+
+message RegisterDocumentResponse {
+  bool success = 1;
+  string message = 2;
+  string document_id = 3;          // UUID созданного документа
+  VerificationResult verification_result = 4;
+}
+
+// Получение статуса верификации
+message GetVerificationStatusRequest {
+  string auth_id = 1;
+  string document_id = 2;          // Опционально, если не указан - последний документ
+}
+
+message GetVerificationStatusResponse {
+  VerificationStatus status = 1;
+  VerificationResult verification_result = 2;
+  google.protobuf.Timestamp verification_date = 3;
+  string message = 4;
+}
+
+// Получение документа пользователя
+message GetUserDocumentRequest {
+  string auth_id = 1;
+}
+
+message GetUserDocumentResponse {
+  bool found = 1;
+  UserDocument document = 2;
+}
+
+// Проверка совпадения лица
+message VerifyFaceMatchRequest {
+  string auth_id = 1;
+  bytes current_photo = 2;         // Текущее фото для сравнения
+  double min_similarity = 3;       // Минимальный порог схожести (0.0-1.0)
+}
+
+message VerifyFaceMatchResponse {
+  bool match = 1;
+  double similarity_score = 2;     // Скор схожести 0.0-1.0
+  string message = 3;
+}
+
+// Валидация документа
+message ValidateDocumentRequest {
+  string iin = 1;                  // ИИН для проверки
+  string document_number = 2;      // Номер документа
+}
+
+message ValidateDocumentResponse {
+  bool valid = 1;
+  bool blocked = 2;                // Заблокирован ли документ
+  string reason = 3;               // Причина если не валиден
+  UserDocument document = 4;       // Информация о документе если валиден
+}
+
+// Получение подозрительных документов
+message GetSuspiciousDocumentsRequest {
+  int32 page = 1;
+  int32 size = 2;
+  SeverityLevel severity_filter = 3;
+}
+
+message GetSuspiciousDocumentsResponse {
+  repeated SuspiciousDocument documents = 1;
+  int32 total_count = 2;
+}
+
+// Блокировка документа
+message BlockDocumentRequest {
+  string document_number = 1;
+  string iin = 2;
+  string reason_code = 3;
+  string reason_description = 4;
+  SeverityLevel severity = 5;
+  string reported_by = 6;
+  google.protobuf.Timestamp blocked_until = 7; // Опционально
+}
+
+message BlockDocumentResponse {
+  bool success = 1;
+  string message = 2;
+  string block_id = 3;
+}
+
+// ============== DATA MODELS ==============
+
+// Информация о документе пользователя
+message UserDocument {
+  string id = 1;
+  string auth_id = 2;
+  string iin = 3;
+  string full_name = 4;
+  string birth_date = 5;           // YYYY-MM-DD
+  string document_number = 6;
+  string issue_date = 7;           // YYYY-MM-DD
+  string expiry_date = 8;          // YYYY-MM-DD
+  string issuing_authority = 9;
+  VerificationStatus verification_status = 10;
+  google.protobuf.Timestamp verification_date = 11;
+  double face_match_score = 12;
+  double ocr_confidence = 13;
+  google.protobuf.Timestamp created_at = 14;
+  google.protobuf.Timestamp updated_at = 15;
+}
+
+// Результат верификации
+message VerificationResult {
+  bool ocr_success = 1;
+  double ocr_confidence = 2;
+  bool face_detected_in_document = 3;
+  bool face_match_success = 4;
+  double face_similarity_score = 5;
+  bool document_valid = 6;
+  repeated string errors = 7;
+  repeated string warnings = 8;
+  ProcessingStats processing_stats = 9;
+}
+
+// Статистика обработки
+message ProcessingStats {
+  int64 ocr_processing_time_ms = 1;
+  int64 face_processing_time_ms = 2;
+  int64 total_processing_time_ms = 3;
+  string ocr_engine_version = 4;
+  string face_engine_version = 5;
+}
+
+// Подозрительный документ
+message SuspiciousDocument {
+  string id = 1;
+  string document_number = 2;
+  string iin = 3;
+  string reason_code = 4;
+  string reason_description = 5;
+  string reported_by = 6;
+  SeverityLevel severity_level = 7;
+  bool is_active = 8;
+  google.protobuf.Timestamp blocked_until = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+// Попытка верификации
+message VerificationAttempt {
+  string id = 1;
+  string auth_id = 2;
+  VerificationType verification_type = 3;
+  AttemptStatus attempt_status = 4;
+  string error_code = 5;
+  string error_message = 6;
+  int64 processing_time_ms = 7;
+  double confidence_score = 8;
+  string ip_address = 9;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+// ============== ENUMS ==============
+
+// Тип документа
+enum DocumentType {
+  DOCUMENT_TYPE_UNSPECIFIED = 0;
+  ID_CARD = 1;                     // Удостоверение личности РК
+  PASSPORT = 2;                    // Паспорт РК
+  DRIVING_LICENSE = 3;             // Водительские права
+}
+
+// Статус верификации
+enum VerificationStatus {
+  VERIFICATION_STATUS_UNSPECIFIED = 0;
+  PENDING = 1;                     // Ожидает обработки
+  PROCESSING = 2;                  // В процессе обработки
+  VERIFIED = 3;                    // Успешно верифицирован
+  REJECTED = 4;                    // Отклонен
+  EXPIRED = 5;                     // Истек срок действия
+  BLOCKED = 6;                     // Заблокирован
+}
+
+// Тип верификации
+enum VerificationType {
+  VERIFICATION_TYPE_UNSPECIFIED = 0;
+  OCR = 1;                         // Распознавание текста
+  FACE_MATCH = 2;                  // Сопоставление лиц
+  DOCUMENT_VALIDATION = 3;         // Валидация документа
+  FULL_VERIFICATION = 4;           // Полная верификация
+}
+
+// Статус попытки
+enum AttemptStatus {
+  ATTEMPT_STATUS_UNSPECIFIED = 0;
+  SUCCESS = 1;                     // Успешно
+  FAILURE = 2;                     // Неудача
+  ERROR = 3;                       // Ошибка системы
+}
+
+// Уровень серьезности
+enum SeverityLevel {
+  SEVERITY_LEVEL_UNSPECIFIED = 0;
+  LOW = 1;                         // Низкий
+  MEDIUM = 2;                      // Средний
+  HIGH = 3;                        // Высокий
+  CRITICAL = 4;                    // Критический
+}
+
+// ============== ERROR HANDLING ==============
+
+// Коды ошибок для стандартизации
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+
+  // Ошибки OCR
+  OCR_FAILED = 1000;
+  OCR_POOR_QUALITY = 1001;
+  OCR_NO_TEXT_FOUND = 1002;
+  OCR_INVALID_FORMAT = 1003;
+
+  // Ошибки распознавания лиц
+  FACE_NOT_FOUND_IN_DOCUMENT = 2000;
+  FACE_NOT_FOUND_IN_SELFIE = 2001;
+  FACE_POOR_QUALITY = 2002;
+  FACE_MULTIPLE_FACES = 2003;
+  FACE_SIMILARITY_TOO_LOW = 2004;
+  FACE_LIVENESS_CHECK_FAILED = 2005;
+
+  // Ошибки валидации документа
+  DOCUMENT_EXPIRED = 3000;
+  DOCUMENT_INVALID_IIN = 3001;
+  DOCUMENT_BLACKLISTED = 3002;
+  DOCUMENT_DUPLICATE = 3003;
+  DOCUMENT_UNSUPPORTED_TYPE = 3004;
+
+  // Системные ошибки
+  INTERNAL_ERROR = 5000;
+  SERVICE_UNAVAILABLE = 5001;
+  PROCESSING_TIMEOUT = 5002;
+  INVALID_REQUEST = 5003;
+  UNAUTHORIZED = 5004;
+}
+
+// Детализированная информация об ошибке
+message ErrorDetail {
+  ErrorCode error_code = 1;
+  string message = 2;
+  string field = 3;                // Поле, в котором произошла ошибка
+  string suggestion = 4;           // Предложение по исправлению
+}

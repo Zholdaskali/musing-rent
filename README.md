@@ -1,6 +1,16 @@
 
 
 
+├── ticket-service          # Управление билетами и мероприятиями
+├── biometric-service       # Биометрическая верификация (ИИ)
+├── document-service        # Верификация документов (OCR + ИИ)
+├── fraud-detection-service # Детекция мошенничества (ML)
+├── payment-service         # Платежная система
+├── document-service        # Верификация документов (OCR + ИИ)
+├── fraud-detection-service # Детекция мошенничества (ML)
+├── payment-service         # Платежная система
+└── notification-service    # Уведомления пользователей
+
 
 Примеры типов коммитов в гитхаб:
 

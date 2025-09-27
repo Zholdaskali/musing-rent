@@ -1,7 +1,7 @@
 -- init Database user-service (Микросервиса) --
 
 CREATE TABLE t_user_profiles (
-    id              UUID            DEFAULT,
+    id              UUID            NOT NULL,
     auth_id         UUID            NOT NULL,                   -- auth_id приходит из Auth-service
     full_name       VARCHAR(100),
     avatar_url      TEXT,
@@ -12,7 +12,7 @@ CREATE TABLE t_user_profiles (
 
 -- Таблица адресов или других пользовательских данных
 CREATE TABLE t_user_addresses (
-    id              UUID            DEFAULT,
+    id              UUID            NOT NULL,
     auth_id         UUID            NOT NULL,                   -- auth_id пользователя в микросервисе auth подробнее в One-note
     street          VARCHAR(255),
     city            VARCHAR(100),

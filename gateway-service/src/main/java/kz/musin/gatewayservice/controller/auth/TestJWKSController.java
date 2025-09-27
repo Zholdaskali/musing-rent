@@ -14,12 +14,25 @@ public class TestJWKSController {
 
     private static final Logger log = LoggerFactory.getLogger(TestJWKSController.class);
 
+    /**
+     *
+     *
+     *
+     * @return
+     */
     @GetMapping("/public/images")
     public ApiResponse<?> getImages() {
         log.info("getImages");
         return ResponseBuilder.success("List images", HttpStatus.OK);
     }
 
+    /**
+     *
+     *
+     *
+     * @param id
+     * @return
+     */
     @GetMapping("/private/profile/{id}")
     public ApiResponse<?> getProfile(@PathVariable("id") String id) {
         log.info("getProfile");

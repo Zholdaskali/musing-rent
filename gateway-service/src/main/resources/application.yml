@@ -31,6 +31,11 @@ grpc:
       negotiationType: PLAINTEXT
       defaultLoadBalancingPolicy: round_robin
 
+    user:
+      address: discovery:///user-service
+      negotiationType: PLAINTEXT
+      defaultLoadBalancingPolicy: round_robin
+
     order:
       address: discovery:///order-service
       negotiationType: PLAINTEXT
